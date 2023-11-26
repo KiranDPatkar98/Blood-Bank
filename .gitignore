@@ -1,0 +1,11 @@
+# Ignore Django-specific files
+*.pyc
+*.pyo
+__pycache__
+# Exclude other Django-specific files as needed
+
+
+# Ignore local settings (if using separate settings for development, testing, production)
+local_settings.py
+
+env/
