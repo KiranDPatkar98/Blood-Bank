@@ -1,0 +1,6 @@
+@import '../../index.scss';
+
+.registration-page{
+    @include vertical-center; 
+    min-height:100vh;
+}
