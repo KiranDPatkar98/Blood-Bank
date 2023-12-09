@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
 import './register.scss';
+import { useAPIClient } from '../../api';
 
 const schema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
@@ -19,6 +20,17 @@ const schema = Yup.object().shape({
 });
 
 const Register = () => {
+  const createUser = async (data: any) => {
+    try {
+      data['phone_number'] = data['phoneNumber'];
+      delete data['phoneNumber'];
+      const res = await post('/users/', data);
+      console.log(res, 'res');
+    } catch {
+      console.log('Iam inside catch block');
+    }
+  };
+
   const formik = useFormik({
     initialValues: {
       name: '',
@@ -28,17 +40,20 @@ const Register = () => {
       password: '',
     },
     validationSchema: schema,
-    onSubmit: () => {
-      console.log('Inside submit');
+    onSubmit: (values) => {
+      createUser(values);
     },
   });
 
-  console.log(formik.errors, 'iam formik');
+  const { post } = useAPIClient();
 
   return (
     <div className="registration-page">
       <div className="container">
-        <Form className="card p-3 mx-auto col-6" onSubmit={formik.handleSubmit}>
+        <Form
+          className="card p-3 mx-auto col-lg-6 col-md-12"
+          onSubmit={formik.handleSubmit}
+        >
           <Form.Group className="mb-3" controlId="name">
             <Form.Label>Name</Form.Label>
             <Form.Control
@@ -91,7 +106,11 @@ const Register = () => {
               type="text"
               placeholder="Enter the username"
               onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
+              onBlur={(e) => {
+                console.log('Iam inside blur');
+
+                formik.handleBlur(e);
+              }}
               isInvalid={!formik.values.username && formik.touched.username}
             />
             <Form.Control.Feedback type="invalid">

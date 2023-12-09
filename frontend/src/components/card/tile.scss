@@ -1,0 +1,10 @@
+.tile{
+    height:60vh;
+    transition: transform 0.5s ease-in-out;
+    cursor: pointer;
+}
+
+.tile:hover{
+    background-color: pink;
+    transform: scale(1.1);
+}
