@@ -20,6 +20,8 @@ const schema = Yup.object().shape({
 });
 
 const Register = () => {
+  const { post } = useAPIClient();
+
   const createUser = async (data: any) => {
     try {
       data['phone_number'] = data['phoneNumber'];
@@ -44,8 +46,6 @@ const Register = () => {
       createUser(values);
     },
   });
-
-  const { post } = useAPIClient();
 
   return (
     <div className="registration-page">

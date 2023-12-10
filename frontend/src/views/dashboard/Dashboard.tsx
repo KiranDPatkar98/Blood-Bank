@@ -1,13 +1,9 @@
-import './dashboard.scss';
 import Tile from '../../components/card/Tile';
-import Header from '../../components/header/Header';
-import Footer from '../../components/footer/Footer';
 import { Container, Row, Col } from 'react-bootstrap';
 
 const Dashboard = () => {
   return (
     <>
-      <Header />
       <Container>
         <Row className="mt-5">
           <Col xs={12} md={6} lg={3}>
@@ -28,7 +24,7 @@ const Dashboard = () => {
           </Col>
           <Col xs={12} md={6} lg={3}>
             <Tile
-              title="Serach a donar"
+              title="Search a donar"
               description="Seeking blood donors nearby. Find donors quickly for urgent needs. Save lives together"
               path="images/search.jpg"
               url="search-donar"
@@ -39,12 +35,11 @@ const Dashboard = () => {
               title="Manage user"
               description="You can add, update, and delete users"
               path="images/user.jpg"
-              url="/manage-user"
+              url="/users"
             />
           </Col>
         </Row>
       </Container>
-      <Footer />
     </>
   );
 };

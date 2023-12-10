@@ -3,7 +3,7 @@ const Header = () => {
   return (
     <Navbar bg="dark" data-bs-theme="dark" expand="lg">
       <Container>
-        <Navbar.Brand href="#dashboard">Blood bank</Navbar.Brand>
+        <Navbar.Brand href="/dashboard">Blood bank</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
