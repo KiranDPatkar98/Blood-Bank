@@ -24,7 +24,32 @@ class Usermaster(AbstractUser, BaseModel):
 
 class BloodGroup(models.Model):
     id = models.AutoField(primary_key=True)
-    group = models.CharField(max_length=10)
+    group = models.CharField(max_length=10, unique=True)
 
     def __str__(self):
         return self.group
+
+
+class BloodDonar(BaseModel):
+    donar = models.ForeignKey(
+        Usermaster, on_delete=models.CASCADE, to_field='username')  # we are mentioning here username as foreignkey by default it wil take primary key
+    blood_group = models.ForeignKey(
+        BloodGroup, on_delete=models.CASCADE, to_field='group')
+    units = models.PositiveIntegerField()
+    body_weight = models.PositiveIntegerField(help_text='Weight in KG')
+    accepted = models.BooleanField(default=False)
+    description = models.TextField(max_length=200)
+
+    def __str__(self):
+        return self.donar.username
+
+
+class BloodRequests(BaseModel):
+    requestor = models.ForeignKey(
+        Usermaster, on_delete=models.CASCADE, to_field='username')
+    blood_group = models.ForeignKey(
+        BloodGroup, on_delete=models.CASCADE, to_field='group')
+    units = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f'requested by {self.requestor.username}'

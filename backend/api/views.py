@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializer import UserSerializer
+from .serializer import UserSerializer, BloodDonarSerializer, BloodRequestSerializer
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -102,7 +102,6 @@ def user(request):
     if request.method == 'DELETE':
         try:
             uid = request.query_params.get('uid')
-            print(uid)
             try:
                 user = Usermaster.objects.get(uid=uid)
 
@@ -150,3 +149,60 @@ def login(request):
 
     except Exception as e:
         print(e)
+
+
+# Blood-Donar
+@api_view(['POST'])
+def donate_blood(request):
+    try:
+        data = request.data
+        serializer = BloodDonarSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'status': 200,
+                'message': 'Added successfully',
+                'data': serializer.data
+            })
+        else:
+            return Response({
+                'status': 422,
+                'message': serializer.errors,
+            }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    except Exception as e:
+        return Response(
+            {
+                'status': 500,
+                'message': 'Something went wrong'
+
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# Blood-request
+@api_view(['POST'])
+def request_blood(request):
+    try:
+        data = request.data
+        print(data)
+        serializer = BloodRequestSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'status': 200,
+                'message': 'Added successfully',
+                'data': serializer.data
+            })
+        else:
+            return Response({
+                'status': 422,
+                'message': serializer.errors,
+            }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    except Exception as e:
+        return Response(
+            {
+                'status': 500,
+                'message': str(e)
+
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
