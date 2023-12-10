@@ -6,8 +6,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Usermaster
-        fields = ['uid', 'username', 'email', 'age',
-                  'phone_number', 'location', 'address']
+        fields = ['uid', 'name', 'username', 'email',
+                  'phone_number']
 
     def validate(self, attrs):
         if attrs.get('age'):
@@ -23,5 +23,4 @@ class UserSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     'Phone number must be exactly 10 characters long'
                 )
-
         return attrs

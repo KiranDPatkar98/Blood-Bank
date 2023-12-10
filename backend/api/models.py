@@ -15,7 +15,16 @@ class BaseModel(models.Model):
 
 
 class Usermaster(AbstractUser, BaseModel):
+    name = models.CharField(max_length=50, null=True)
     age = models.PositiveIntegerField(blank=True, null=True)
     phone_number = models.CharField(max_length=10, unique=True)
-    location = models.CharField(max_length=50)
+    # location = models.CharField(max_length=50)
     address = models.TextField(max_length=100)
+
+
+class BloodGroup(models.Model):
+    id = models.AutoField(primary_key=True)
+    group = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.group

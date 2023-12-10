@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import home, user
+from .views import home, user, login
 from rest_framework.routers import DefaultRouter
 
 # router = DefaultRouter()
@@ -9,6 +9,7 @@ from rest_framework.routers import DefaultRouter
 urlpatterns = [
     path('', home, name='home'),
     path('users/', user, name='user'),
+    path('login/', login, name='login')
 ]
 
 # urlpatterns += router.urls
