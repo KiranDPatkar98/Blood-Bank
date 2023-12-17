@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializer import UserSerializer, BloodDonarSerializer, BloodRequestSerializer
+from .serializer import SearchDonarSerializer, UserSerializer, BloodDonarSerializer, BloodRequestSerializer
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from .models import Usermaster
+from .models import Usermaster, BloodDonar
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -167,7 +167,7 @@ def donate_blood(request):
         else:
             return Response({
                 'status': 422,
-                'message': serializer.errors,
+                'message': str(serializer.errors),
             }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     except Exception as e:
@@ -196,7 +196,7 @@ def request_blood(request):
         else:
             return Response({
                 'status': 422,
-                'message': serializer.errors,
+                'message': str(serializer.errors),
             }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     except Exception as e:
@@ -206,3 +206,27 @@ def request_blood(request):
                 'message': str(e)
 
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# Search- donar
+@api_view(['GET'])
+def search_donor(request):
+    blood_group = request.GET.get('blood_group')
+    city = request.GET.get('city')
+    donors = BloodDonar.objects.all()
+
+    if blood_group:
+        donors = donors.filter(blood_group__group=blood_group)
+    if city:
+        donors = donors.filter(city=city)
+
+    # fetching the donar related data from usermaster table
+    donors_with_user_info = donors.select_related('donar')
+
+    serializer = SearchDonarSerializer(donors_with_user_info, many=True)
+
+    return Response({
+        'status': 200,
+        'message': 'Fetched succesfully',
+        'data': serializer.data
+    })

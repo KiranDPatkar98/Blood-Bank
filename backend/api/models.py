@@ -36,9 +36,9 @@ class BloodDonar(BaseModel):
     blood_group = models.ForeignKey(
         BloodGroup, on_delete=models.CASCADE, to_field='group')
     units = models.PositiveIntegerField()
-    body_weight = models.PositiveIntegerField(help_text='Weight in KG')
+    city = models.CharField(null=True, max_length=50)
     accepted = models.BooleanField(default=False)
-    description = models.TextField(max_length=200)
+    address = models.TextField(max_length=200)
 
     def __str__(self):
         return self.donar.username

@@ -27,12 +27,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class BloodDonarSerializer(serializers.ModelSerializer):
-    description = serializers.CharField(required=False)
+    address = serializers.CharField(required=False)
 
     class Meta:
         model = BloodDonar
         fields = ['uid', 'donar', 'blood_group', 'units',
-                  'body_weight', 'accepted', 'description']
+                  'city', 'accepted', 'address']
 
 
 class BloodRequestSerializer(serializers.ModelSerializer):
@@ -40,3 +40,13 @@ class BloodRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = BloodRequests
         fields = ['uid', 'requestor', 'blood_group', 'units']
+
+
+class SearchDonarSerializer(serializers.ModelSerializer):
+    email = serializers.CharField(source='donar.email')
+    phone_number = serializers.CharField(source='donar.phone_number')
+
+    class Meta:
+        model = BloodDonar
+        fields = ['blood_group', 'city', 'address',
+                  'donar', 'phone_number', 'email']
