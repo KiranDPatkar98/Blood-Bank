@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Table } from 'react-bootstrap';
 import { useAPIClient } from '../../api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUserPen, faTrash } from '@fortawesome/free-solid-svg-icons';
+import './users.scss';
 
 type UsersType = {
   name: string;
@@ -49,7 +51,14 @@ const Users = () => {
                 <td>{value?.email}</td>
                 <td>{value?.phone_number}</td>
                 <td>
-                  <FontAwesomeIcon icon={['fas', 'user-edit']} />
+                  <FontAwesomeIcon
+                    className="action-icon mx-2"
+                    icon={faUserPen}
+                  />
+                  <FontAwesomeIcon
+                    className="action-icon mx-2"
+                    icon={faTrash}
+                  />
                 </td>
               </tr>
             );

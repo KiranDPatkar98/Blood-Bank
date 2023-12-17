@@ -1,5 +1,5 @@
 .tile{
-    height: 60vh !important;
+    height: 20rem !important;
     transition: transform 0.3s ease-in-out;
     cursor: pointer;
 }
@@ -9,3 +9,12 @@
     background-color: pink;
     transform: scale(1.1);
 }
+
+/* For screens smaller than medium (sm) */
+@media (max-width: 767px) {
+    /* Remove hover effect for small screens */
+    .tile:hover {
+    //   background-color: initial;
+      transform: none;
+    }
+  }

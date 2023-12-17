@@ -5,7 +5,7 @@ const Dashboard = () => {
   return (
     <>
       <Container>
-        <Row className="mt-5">
+        <Row className="mt-5 g-3">
           <Col xs={12} md={6} lg={3}>
             <Tile
               title="Become a donar"
@@ -27,7 +27,7 @@ const Dashboard = () => {
               title="Search a donar"
               description="Seeking blood donors nearby. Find donors quickly for urgent needs. Save lives together"
               path="images/search.jpg"
-              url="search-donar"
+              url="/search-donar"
             />
           </Col>
           <Col xs={12} md={6} lg={3}>
