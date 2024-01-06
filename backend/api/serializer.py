@@ -32,7 +32,7 @@ class BloodDonarSerializer(serializers.ModelSerializer):
     class Meta:
         model = BloodDonar
         fields = ['uid', 'donar', 'blood_group', 'units',
-                  'city', 'accepted', 'address']
+                  'city', 'address']
 
 
 class BloodRequestSerializer(serializers.ModelSerializer):

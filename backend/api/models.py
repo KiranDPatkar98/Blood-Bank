@@ -18,7 +18,6 @@ class Usermaster(AbstractUser, BaseModel):
     name = models.CharField(max_length=50, null=True)
     age = models.PositiveIntegerField(blank=True, null=True)
     phone_number = models.CharField(max_length=10, unique=True)
-    # location = models.CharField(max_length=50)
     address = models.TextField(max_length=100)
 
 
@@ -36,8 +35,7 @@ class BloodDonar(BaseModel):
     blood_group = models.ForeignKey(
         BloodGroup, on_delete=models.CASCADE, to_field='group')
     units = models.PositiveIntegerField()
-    city = models.CharField(null=True, max_length=50)
-    accepted = models.BooleanField(default=False)
+    city = models.CharField(null=False, max_length=50)
     address = models.TextField(max_length=200)
 
     def __str__(self):
