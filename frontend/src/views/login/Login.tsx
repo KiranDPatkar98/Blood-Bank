@@ -4,12 +4,19 @@ import './login.scss';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
+import { useAPIClient } from '../../api';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { post } = useAPIClient();
 
   const login = async (values: any) => {
-    console.log(values);
+    try {
+      const res = await post('/login/', values);
+      localStorage.setItem('access_token', res.access_token);
+      localStorage.setItem('refresh_token', res.refresh_token);
+      navigate('/dashboard');
+    } catch {}
 
     navigate('/dashboard');
   };

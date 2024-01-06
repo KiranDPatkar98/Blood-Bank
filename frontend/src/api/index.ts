@@ -4,11 +4,13 @@ import axios, { AxiosError } from 'axios'
 const useAPIClient=()=>{
 
 const makeRequest=useCallback(async(endpoint:string,options?: { method: string; body?: any; },overrideBaseUrl?: any)=>{
+    const token=localStorage.getItem('access_token')
     const baseURL=`http://localhost:8000${endpoint}`
     try {
         const headers = {
             Accept: 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
         };
         const response = await axios({
             url: baseURL,
@@ -20,8 +22,6 @@ const makeRequest=useCallback(async(endpoint:string,options?: { method: string; 
     }
     catch(error){
         if (error instanceof AxiosError) {    
-            console.log(error?.response?.data);
-                   
             throw new Error(JSON.stringify({ ...error?.response?.data, status: error?.response?.status }));
         }
 
