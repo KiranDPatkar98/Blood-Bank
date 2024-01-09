@@ -1,35 +1,64 @@
-import { Form, Button, Alert } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Form, Button, Alert, Modal } from 'react-bootstrap';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
-import './register.scss';
 import { useAPIClient } from '../../api';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
-const schema = Yup.object().shape({
-  name: Yup.string().required('Name is required'),
-  email: Yup.string()
-    .email('Invalid email address format')
-    .required('Email is required'),
-  phoneNumber: Yup.string().required('Password is required'),
-  username: Yup.string()
-    .min(3, 'Username must be 3 characters at minimum')
-    .required('Username is required'),
-  password: Yup.string()
-    .min(3, 'Password must be 3 characters at minimum')
-    .required('Password is required'),
-});
+type Props = {
+  action?: string;
+};
 
-const Register = () => {
-  const { post } = useAPIClient();
+const ManageUser = ({ action }: Props) => {
+  const { post, put } = useAPIClient();
   const [errorMessage, setErrorMEssage] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  const uid = useParams().uid ?? null;
+  const navigate = useNavigate();
+
+  const schema = Yup.object().shape({
+    name: Yup.string().required('Name is required'),
+    email: Yup.string()
+      .email('Invalid email address format')
+      .required('Email is required'),
+    phoneNumber: Yup.string().required('Password is required'),
+    username: Yup.string()
+      .min(3, 'Username must be 3 characters at minimum')
+      .required('Username is required'),
+    password:
+      action === 'add'
+        ? Yup.string()
+            .min(3, 'Password must be 3 characters at minimum')
+            .required('Password is required')
+        : Yup.string().notRequired(),
+  });
+
+  const userInfo =
+    useSelector((s: any) =>
+      s.users.users.find((values: any) => values.uid === uid)
+    ) ?? null;
 
   const createUser = async (data: any) => {
     try {
       data['phone_number'] = data['phoneNumber'];
       delete data['phoneNumber'];
-      const res = await post('/users/', data);
-      console.log(res, 'res');
+      await post('/create-user/', data);
+      setSuccessMessage('User created successfully');
+    } catch (e) {
+      const error = JSON.parse((e as Error).message);
+      setErrorMEssage(error.message);
+    }
+  };
+
+  const updateUser = async (data: any) => {
+    try {
+      const { password, ...body } = data;
+      body['phone_number'] = body['phoneNumber'];
+
+      delete body['phoneNumber'];
+      await put(`/update-user/?uid=${userInfo.uid}`, body);
+      setSuccessMessage('User updated successfully');
     } catch (e) {
       const error = JSON.parse((e as Error).message);
       setErrorMEssage(error.message);
@@ -45,16 +74,46 @@ const Register = () => {
       password: '',
     },
     validationSchema: schema,
+    enableReinitialize: true,
     onSubmit: (values) => {
-      createUser(values);
+      if (action === 'add') {
+        createUser(values);
+      } else {
+        updateUser(values);
+      }
     },
   });
 
+  const getUserData = () => {
+    formik.setFieldValue('name', userInfo?.name);
+    formik.setFieldValue('email', userInfo?.email);
+    formik.setFieldValue('phoneNumber', userInfo?.phone_number);
+    formik.setFieldValue('username', userInfo?.username);
+  };
+
+  useEffect(() => {
+    if (action === 'edit') {
+      getUserData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userInfo]);
+
+  const handleClose = () => {
+    navigate('-1');
+  };
+
   return (
-    <div className="registration-page">
-      <div className="container">
+    <div className="container">
+      <div className="">
+        <Modal show={!!successMessage} onHide={handleClose}>
+          <Modal.Header closeButton></Modal.Header>
+          <Modal.Body className="text-center">{successMessage}</Modal.Body>
+        </Modal>
+        <div className="mb-3">
+          <Button onClick={() => navigate(-1)}>Go back</Button>
+        </div>
         <Form
-          className="card p-3 mx-auto col-lg-6 col-md-12"
+          className="card p-3 col-lg-6 col-md-12"
           onSubmit={formik.handleSubmit}
         >
           <Form.Group className="mb-3" controlId="name">
@@ -66,6 +125,7 @@ const Register = () => {
               isInvalid={!formik.values.name && formik.touched.name}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
+              value={formik.values.name}
             />
             <Form.Control.Feedback type="invalid">
               {formik.touched.name && formik.errors.name}
@@ -80,6 +140,7 @@ const Register = () => {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               isInvalid={!formik.values.email && formik.touched.email}
+              value={formik.values.email}
             />
             <Form.Control.Feedback type="invalid">
               {formik.touched.email && formik.errors.email}
@@ -96,6 +157,7 @@ const Register = () => {
               isInvalid={
                 !formik.values.phoneNumber && formik.touched.phoneNumber
               }
+              value={formik.values.phoneNumber}
             />
             <Form.Control.Feedback type="invalid">
               {formik.touched.phoneNumber && formik.errors.phoneNumber}
@@ -110,11 +172,10 @@ const Register = () => {
               placeholder="Enter the username"
               onChange={formik.handleChange}
               onBlur={(e) => {
-                console.log('Iam inside blur');
-
                 formik.handleBlur(e);
               }}
               isInvalid={!formik.values.username && formik.touched.username}
+              value={formik.values.username}
             />
             <Form.Control.Feedback type="invalid">
               {formik.touched.username && formik.errors.username}
@@ -129,20 +190,18 @@ const Register = () => {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               isInvalid={!formik.values.password && formik.touched.password}
+              value={formik.values.password}
             />
             <Form.Control.Feedback type="invalid">
               {formik.touched.password && formik.errors.password}
             </Form.Control.Feedback>
           </Form.Group>
-          <p>
-            Already have an account ? <Link to="/login">Login </Link>
-          </p>
           {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
-          <Button type="submit">Register</Button>
+          <Button type="submit">{action === 'add' ? 'Add' : 'Update'}</Button>
         </Form>
       </div>
     </div>
   );
 };
 
-export default Register;
+export default ManageUser;

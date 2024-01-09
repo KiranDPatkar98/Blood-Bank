@@ -5,17 +5,6 @@ import { PieChart, Pie, Cell, Legend } from 'recharts';
 import Tile from '../../components/card/Tile';
 import { useAPIClient } from '../../api';
 
-// const data = [
-//   { bloodGroup: 'A+', units: 10 },
-//   { bloodGroup: 'B+', units: 15 },
-//   { bloodGroup: 'AB+', units: 20 },
-//   { bloodGroup: 'O+', units: 12 },
-//   { bloodGroup: 'A-', units: 8 },
-//   { bloodGroup: 'B-', units: 5 },
-//   { bloodGroup: 'AB-', units: 9 },
-//   { bloodGroup: 'O-', units: 7 },
-// ];
-
 const COLORS = [
   '#0088FE',
   '#00C49F',

@@ -8,6 +8,11 @@ $base-font-size: 16px;
     align-items: center;
 }
 
+@mixin horizontal-end{
+    display: flex;
+    justify-content: flex-end;
+}
+
 body{
     box-sizing: border-box;
     font-size: $base-font-size;

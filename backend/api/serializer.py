@@ -7,7 +7,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usermaster
         fields = ['uid', 'name', 'username', 'email',
-                  'phone_number']
+                  'phone_number', 'password']
+        extra_kwargs = {'password': {'write_only': True}} 
 
     def validate(self, attrs):
         if attrs.get('age'):
@@ -50,3 +51,13 @@ class SearchDonarSerializer(serializers.ModelSerializer):
         model = BloodDonar
         fields = ['blood_group', 'city', 'address',
                   'donar', 'phone_number', 'email']
+
+
+class LoginSerializer(serializers.ModelSerializer):
+
+    username = serializers.CharField(default="username")
+    password = serializers.CharField(default="password")
+
+    class Meta(object):
+        model = Usermaster
+        fields = ['username', 'password']

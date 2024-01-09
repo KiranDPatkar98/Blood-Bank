@@ -1,7 +1,6 @@
-from django.shortcuts import render
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
-from .serializer import SearchDonarSerializer, UserSerializer, BloodDonarSerializer, BloodRequestSerializer
+from .serializer import SearchDonarSerializer, UserSerializer, BloodDonarSerializer, BloodRequestSerializer, LoginSerializer
 from rest_framework import status
 
 from rest_framework.decorators import action
@@ -10,130 +9,172 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 
+@extend_schema(
+    request=UserSerializer,
+    responses=UserSerializer,
+    tags=['User'],
+    description="API for fetching user details"
+)
 @api_view(['GET'])
-def home(request):
-    return Response({
-        'status': 200,
-        'message': "Welcome to the blood bank API's"
-    })
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_users(request):
+    if not request.user.is_authenticated:
+        return Response(
+            {
+                'status': status.HTTP_401_UNAUTHORIZED,
+                'message': 'Unauthorized: Invalid or missing token'
+            },
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    try:
+        users = Usermaster.objects.all()
+        serializer = UserSerializer(users, many=True)
+
+        return Response(
+            {
+                "status": 200,
+                'message': 'Details fetched successfully',
+                'data': serializer.data
+            }
+        )
+    except Exception as e:
+        print(e)
 
 
-@api_view(['GET', 'POST', 'PUT', 'DELETE'])
-def user(request):
+@extend_schema(
+    request=UserSerializer,
+    responses=UserSerializer,
+    tags=['User'],
+    description="Create a new user"
+)
+@api_view(['POST'])
+def create_user(request):
+    try:
+        data = request.data
+        serializer = UserSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
 
-    if (request.method == 'GET'):
-        try:
-            users = Usermaster.objects.all()
-            serializer = UserSerializer(users, many=True)
+            user = Usermaster.objects.get(
+                username=request.data['username'])
+            user.set_password(request.data['password'])
+            user.save()
+        else:
+            return Response({
+                'status': 422,
+                'message': serializer.errors,
+            }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        return Response({
+            'status': 200,
+            'message': 'User created successfully',
+            'data': serializer.data
+        })
+    except Exception as e:
+        print(e)
 
+
+@extend_schema(
+    request=UserSerializer,
+    responses=UserSerializer,
+    tags=['User'],
+    description="Update a user",
+    parameters=[
+        OpenApiParameter(name='uid', description='uid',
+                         required=True, type=str),
+    ]
+)
+@api_view(['PUT'])
+def update_user(request):
+    try:
+        uid = request.query_params.get('uid')
+        data = request.data
+        if not uid:
             return Response(
                 {
-                    "status": 200,
-                    'message': 'Details fetched successfully',
-                    'data': serializer.data
-                }
-            )
-        except Exception as e:
-            print(e)
-
-    if (request.method == 'POST'):
-        """
-        API for register the user
-        """
-        try:
-            data = request.data
-            serializer = UserSerializer(data=data)
-            if serializer.is_valid():
-                serializer.save()
-
-                user = Usermaster.objects.get(
-                    username=request.data['username'])
-                user.set_password(request.data['password'])
-                user.save()
-            else:
-                return Response({
-                    'status': 422,
-                    'message': serializer.errors,
-                }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-            return Response({
-                'status': 200,
-                'message': 'User created successfully',
-                'data': serializer.data
-            })
-        except Exception as e:
-            print(e)
-
-    if request.method == 'PUT':
-        try:
-            uid = request.query_params.get('uid')
-            data = request.data
-            if not uid:
-                return Response(
-                    {
-                        'status': 404,
-                        'message': 'UID parameter is required'
-                    },
-                    status=status.HTTP_404_NOT_FOUND
-                )
-            try:
-                user_obj = Usermaster.objects.get(uid=uid)
-            except Exception as e:
-                return Response({
                     'status': 404,
-                    'message': 'User not found'
+                    'message': 'UID parameter is required'
                 },
-                    status=status.HTTP_404_NOT_FOUND
-                )
-            serializer = UserSerializer(user_obj, data=data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(
-                    {
-                        'status': 200,
-                        'message': 'User updated successfully',
-                        'data': serializer.data
-                    }
-                )
-            else:
-                return Response(
-                    {
-                        'status': 422,
-                        'message': 'Invalid data for updating user',
-                        'errors': serializer.errors
-                    },
-                    status=status.HTTP_422_UNPROCESSABLE_ENTITY
-                )
-
-        except Exception as e:
-            print(e)
-
-    if request.method == 'DELETE':
+                status=status.HTTP_404_NOT_FOUND
+            )
         try:
-            uid = request.query_params.get('uid')
-            try:
-                user = Usermaster.objects.get(uid=uid)
-
-            except Exception as e:
-                return Response(
-                    {
-                        'status': 404,
-                        'message': 'User not found'
-
-                    }, status=status.HTTP_404_NOT_FOUND
-                )
-            user.delete()
+            user_obj = Usermaster.objects.get(uid=uid)
+        except Exception as e:
+            return Response({
+                'status': 404,
+                'message': 'User not found'
+            },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = UserSerializer(user_obj, data=data)
+        if serializer.is_valid():
+            serializer.save()
             return Response(
                 {
                     'status': 200,
-                    'message': 'User deleted successfuly'
+                    'message': 'User updated successfully',
+                    'data': serializer.data
                 }
             )
+        else:
+            return Response(
+                {
+                    'status': 422,
+                    'message': 'Invalid data for updating user',
+                    'errors': serializer.errors
+                },
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+
+    except Exception as e:
+        print(e)
+
+
+@extend_schema(
+    request=UserSerializer,
+    responses=UserSerializer,
+    tags=['User'],
+    description="Delete a user",
+    parameters=[
+        OpenApiParameter(name='uid', description='uid',
+                         required=True, type=str),
+    ]
+)
+@api_view(['DELETE'])
+def delete_user(request):
+    try:
+        uid = request.query_params.get('uid')
+        try:
+            user = Usermaster.objects.get(uid=uid)
+
         except Exception as e:
-            print(e)
+            return Response(
+                {
+                    'status': 404,
+                    'message': 'User not found'
+
+                }, status=status.HTTP_404_NOT_FOUND
+            )
+        user.delete()
+        return Response(
+            {
+                'status': 200,
+                'message': 'User deleted successfuly'
+            }
+        )
+    except Exception as e:
+        print(e)
 
 
+@extend_schema(
+    request=LoginSerializer,
+    responses=UserSerializer,
+    tags=['Login'],
+    description="API for Login"
+)
 @api_view(['POST'])
 def login(request):
     data = request.data
@@ -147,19 +188,14 @@ def login(request):
             return Response({
                 'status': status.HTTP_401_UNAUTHORIZED,
                 'message': 'Invalid user or password',
-            })
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
-        # Generate tokens manually for the user since we have custom user model  and our pk is uid
-        refresh = RefreshToken()
-        refresh['uid'] = str(user.uid)  # Use the uid as the identifier
-        refresh['username'] = user.username
-        access_token = refresh.access_token
-        refresh_token = str(refresh)
+        refresh = RefreshToken.for_user(user)
 
         return Response({
             'status': status.HTTP_200_OK,
-            'refresh_token': refresh_token,
-            'access_token': str(access_token),
+            'refresh_token': str(refresh),
+            'access_token': str(refresh.access_token),
         })
 
     except Exception as e:
@@ -167,9 +203,15 @@ def login(request):
 
 
 # Blood-Donar
+@extend_schema(
+    request=BloodDonarSerializer,
+    responses=BloodDonarSerializer,
+    tags=['Blood donor'],
+    description="API for blood donation"
+)
 @api_view(['POST'])
-# @authentication_classes([JWTAuthentication])
-# @permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def donate_blood(request):
     try:
         data = request.data
@@ -197,9 +239,15 @@ def donate_blood(request):
 
 
 # Blood-request
+@extend_schema(
+    request=BloodRequestSerializer,
+    responses=BloodRequestSerializer,
+    tags=['Blood request'],
+    description="API for blood request"
+)
 @api_view(['POST'])
-# @authentication_classes([JWTAuthentication])
-# @permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def request_blood(request):
     try:
         data = request.data
@@ -250,9 +298,15 @@ def request_blood(request):
 
 
 # Search- donar
+@extend_schema(
+    request=SearchDonarSerializer,
+    responses=SearchDonarSerializer,
+    tags=['Search donor'],
+    description="API for donor search"
+)
 @api_view(['GET'])
-# @authentication_classes([JWTAuthentication])
-# @permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def search_donor(request):
     blood_group = request.GET.get('blood_group')
     city = request.GET.get('city')
@@ -277,15 +331,19 @@ def search_donor(request):
     except:
         return Response({
             'status': status.HTTP_404_NOT_FOUND,
-            'message': 'Fetched succesfully',
-
+            'message': 'Not found',
         })
 
 
 # Blood-inventory
 
-
+@extend_schema(
+    tags=['Blood inventory'],
+    description="API for blood inventory"
+)
 @api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def blood_details(request):
 
     # to fetch it from donars
@@ -300,7 +358,6 @@ def blood_details(request):
         'AB-': 0,
         'O+': 0,
         'O-': 0
-
     }
     for donor in serializer.data:
         blood_group = donor['blood_group']
@@ -324,3 +381,15 @@ def blood_details(request):
         'message': 'Fetched succesfully',
         'data': inventory
     })
+
+
+@api_view(['GET'])
+def check_authentication(request):
+    try:
+        if request.user.is_authenticated:
+            return Response({'authenticated': True, status: status.HTTP_200_OK}, status=status.HTTP_200_OK)
+        else:
+            return Response({'authenticated': False, status: status.HTTP_401_UNAUTHORIZED}, status=status.HTTP_401_UNAUTHORIZED)
+
+    except:
+        return Response({'authenticated': False, status: status.HTTP_401_UNAUTHORIZED}, status=status.HTTP_401_UNAUTHORIZED)
