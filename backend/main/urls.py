@@ -17,7 +17,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from django.views.generic.base import RedirectView
 
 # router = routers.DefaultRouter()
 # Register your DRF API endpoints with the router
@@ -28,5 +27,5 @@ urlpatterns = [
     path('', include("api.urls")),
     path(r'api/schema/', SpectacularAPIView.as_view(),
          name="schema"),
-    path(r'docs/', SpectacularSwaggerView.as_view(url_name="schema")),
+    path(r'docs/', SpectacularSwaggerView.as_view()),
 ]

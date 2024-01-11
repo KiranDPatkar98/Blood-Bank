@@ -11,25 +11,30 @@ const schema = Yup.object().shape({
   email: Yup.string()
     .email('Invalid email address format')
     .required('Email is required'),
-  phoneNumber: Yup.string().required('Password is required'),
+  phoneNumber: Yup.string().required('Phone number is required'),
+  // .max(10, 'Maximum is 10'),
   username: Yup.string()
-    .min(3, 'Username must be 3 characters at minimum')
+    // .min(3, 'Username must be 3 characters at minimum')
     .required('Username is required'),
   password: Yup.string()
-    .min(3, 'Password must be 3 characters at minimum')
+    // .min(3, 'Password must be 3 characters at minimum')
     .required('Password is required'),
 });
 
 const Register = () => {
   const { post } = useAPIClient();
   const [errorMessage, setErrorMEssage] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
 
   const createUser = async (data: any) => {
+    setSuccessMessage('');
+    setErrorMEssage('');
     try {
       data['phone_number'] = data['phoneNumber'];
       delete data['phoneNumber'];
-      const res = await post('/users/', data);
-      console.log(res, 'res');
+      await post('/create-user/', data);
+      setSuccessMessage('Successfully created');
+      formik.resetForm();
     } catch (e) {
       const error = JSON.parse((e as Error).message);
       setErrorMEssage(error.message);
@@ -50,6 +55,8 @@ const Register = () => {
     },
   });
 
+  console.log(formik.errors, 'errors');
+
   return (
     <div className="registration-page">
       <div className="container">
@@ -66,6 +73,7 @@ const Register = () => {
               isInvalid={!formik.values.name && formik.touched.name}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
+              value={formik.values.name}
             />
             <Form.Control.Feedback type="invalid">
               {formik.touched.name && formik.errors.name}
@@ -80,6 +88,7 @@ const Register = () => {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               isInvalid={!formik.values.email && formik.touched.email}
+              value={formik.values.email}
             />
             <Form.Control.Feedback type="invalid">
               {formik.touched.email && formik.errors.email}
@@ -96,6 +105,7 @@ const Register = () => {
               isInvalid={
                 !formik.values.phoneNumber && formik.touched.phoneNumber
               }
+              value={formik.values.phoneNumber}
             />
             <Form.Control.Feedback type="invalid">
               {formik.touched.phoneNumber && formik.errors.phoneNumber}
@@ -110,11 +120,10 @@ const Register = () => {
               placeholder="Enter the username"
               onChange={formik.handleChange}
               onBlur={(e) => {
-                console.log('Iam inside blur');
-
                 formik.handleBlur(e);
               }}
               isInvalid={!formik.values.username && formik.touched.username}
+              value={formik.values.username}
             />
             <Form.Control.Feedback type="invalid">
               {formik.touched.username && formik.errors.username}
@@ -129,6 +138,7 @@ const Register = () => {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               isInvalid={!formik.values.password && formik.touched.password}
+              value={formik.values.password}
             />
             <Form.Control.Feedback type="invalid">
               {formik.touched.password && formik.errors.password}
@@ -137,7 +147,11 @@ const Register = () => {
           <p>
             Already have an account ? <Link to="/login">Login </Link>
           </p>
-          {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+          {(errorMessage || successMessage) && (
+            <Alert variant={errorMessage ? 'danger' : 'info'}>
+              {errorMessage || successMessage}
+            </Alert>
+          )}
           <Button type="submit">Register</Button>
         </Form>
       </div>

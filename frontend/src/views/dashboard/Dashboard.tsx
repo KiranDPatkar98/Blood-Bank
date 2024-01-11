@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { PieChart, Pie, Cell, Legend } from 'recharts';
 import Tile from '../../components/card/Tile';
 import { useAPIClient } from '../../api';
+import { useSelector } from 'react-redux';
 
 const COLORS = [
   '#0088FE',
@@ -19,6 +20,7 @@ const COLORS = [
 const Dashboard = () => {
   const [data, setData] = useState([]);
   const { makeRequest } = useAPIClient();
+  const { isSuperUser } = useSelector((s: any) => s.app);
 
   const fetchBloodInventory = async () => {
     try {
@@ -34,9 +36,15 @@ const Dashboard = () => {
   return (
     <>
       <Container>
-        <Row>
+        <Row className="g-3">
           <Col>
-            <div style={{ backgroundColor: '#fff', padding: '20px' }}>
+            <div
+              style={{
+                backgroundColor: '#fff',
+                padding: '20px',
+                overflowX: 'auto',
+              }}
+            >
               <BarChart width={600} height={400} data={data}>
                 <CartesianGrid stroke="#ccc" strokeWidth={1} />
                 <XAxis dataKey="bloodGroup" />
@@ -77,10 +85,10 @@ const Dashboard = () => {
         <Row className="mt-5 g-3">
           <Col xs={12} md={6} lg={3}>
             <Tile
-              title="Become a donar"
+              title="Become a donor"
               description="Offering life by donating blood, a compassionate act fostering hope and saving lives"
               path="images/blood_donar.jpg"
-              url="/donar"
+              url="/donor"
             />
           </Col>
           <Col xs={12} md={6} lg={3}>
@@ -93,20 +101,22 @@ const Dashboard = () => {
           </Col>
           <Col xs={12} md={6} lg={3}>
             <Tile
-              title="Search a donar"
+              title="Search a donor"
               description="Seeking blood donors nearby. Find donors quickly for urgent needs. Save lives together"
               path="images/search.jpg"
-              url="/search-donar"
+              url="/search-donor"
             />
           </Col>
-          <Col xs={12} md={6} lg={3}>
-            <Tile
-              title="Manage user"
-              description="You can add, update, and delete users"
-              path="images/user.jpg"
-              url="/users"
-            />
-          </Col>
+          {isSuperUser && (
+            <Col xs={12} md={6} lg={3}>
+              <Tile
+                title="Manage user"
+                description="You can add, update, and delete users"
+                path="images/user.jpg"
+                url="/users"
+              />
+            </Col>
+          )}
         </Row>
       </Container>
     </>

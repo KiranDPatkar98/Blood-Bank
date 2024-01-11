@@ -1,5 +1,5 @@
 import { useFormik } from 'formik';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Button, Row, Col, Card } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { useAPIClient } from '../../api';
@@ -7,7 +7,7 @@ import CustomModal from '../../components/modal/Modal';
 import { bloodGroups } from '../../helpers/bloodGroups';
 
 const schema = Yup.object().shape({
-  name: Yup.string().required(' Donar name is required'),
+  name: Yup.string().required(' Donor name is required'),
   bloodGroup: Yup.string().required('Blood group is required'),
   units: Yup.string().required('Units is required'),
   city: Yup.string().required('City  is required'),
@@ -32,16 +32,16 @@ const donationInfo = [
   },
 ];
 
-const Donar = () => {
+const Donor = () => {
   const { post } = useAPIClient();
   const [isOpen, setOpen] = useState<boolean>(false);
   const [errorMessage, setErrorMEssage] = useState<string>('');
 
-  const addDonar = async (values: any) => {
+  const addDonor = async (values: any) => {
     try {
       const { name, bloodGroup, weight, ...rest } = values;
       await post('/donate-blood/', {
-        donar: name,
+        donor: name,
         blood_group: bloodGroup,
         ...rest,
       });
@@ -52,6 +52,9 @@ const Donar = () => {
       setErrorMEssage(error.message);
     }
   };
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const formik = useFormik({
     initialValues: {
@@ -64,7 +67,7 @@ const Donar = () => {
     enableReinitialize: true,
     validationSchema: schema,
     onSubmit: (values) => {
-      addDonar(values);
+      addDonor(values);
     },
   });
 
@@ -75,18 +78,18 @@ const Donar = () => {
   };
 
   return (
-    <div className="donar-page">
+    <div className="donor-page">
       <div className="container">
         <CustomModal
           isOpen={isOpen || !!errorMessage}
           heading={errorMessage ? 'Error' : 'Success'}
           body={
-            errorMessage ? errorMessage : 'Donar details added successfully'
+            errorMessage ? errorMessage : 'Donor details added successfully'
           }
           handleClose={onModalClose}
           handleSubmit={onModalClose}
         />
-        <Row>
+        <Row className="g-3">
           <Col lg={6} md={12}>
             <Form className="card p-3" onSubmit={formik.handleSubmit}>
               <Form.Group className="mb-3" controlId="name">
@@ -194,4 +197,4 @@ const Donar = () => {
   );
 };
 
-export default Donar;
+export default Donor;

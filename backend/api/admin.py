@@ -1,10 +1,10 @@
 from django.contrib import admin
-from .models import BloodGroup, BloodDonar, BloodRequests
+from .models import BloodGroup, BloodDonor, BloodRequests
 
 # Register your models here.
 
 admin.site.register(BloodGroup)
-admin.site.register(BloodDonar)
+admin.site.register(BloodDonor)
 admin.site.register(BloodRequests)
 
 
@@ -12,8 +12,8 @@ class BloodGroupAdmin(admin.ModelAdmin):
     list_display = ('id', 'group')
 
 
-class BloodDonarAdmin(admin.ModelAdmin):
-    list_display = ('donar', 'blood_group', 'units',
+class BloodDonorAdmin(admin.ModelAdmin):
+    list_display = ('donor', 'blood_group', 'units',
                     'body_weight', 'accepted', 'description')
 
 

@@ -7,7 +7,11 @@ import { useFormik } from 'formik';
 import { useAPIClient } from '../../api';
 import { LoginStates } from '../../types/LoginState';
 import { useDispatch } from 'react-redux';
-import { updatedLoginState } from '../../redux/slices/authSlice';
+import {
+  updatedLoginState,
+  updatedSessionExpired,
+  updateIsSuperUser,
+} from '../../redux/slices/authSlice';
 import { useState } from 'react';
 
 const Login = () => {
@@ -21,14 +25,13 @@ const Login = () => {
       setErrorMEssage('');
       const res = await post('/login/', values);
       localStorage.setItem('access_token', res.access_token);
-      // localStorage.setItem('refresh_token', res.refresh_token);
       dispatch(updatedLoginState(LoginStates.LOGGED_IN));
+      dispatch(updateIsSuperUser(res?.is_superuser));
+      dispatch(updatedSessionExpired(false));
     } catch (e) {
       const error = JSON.parse((e as Error).message);
       setErrorMEssage(error.message);
     }
-
-    // navigate('/dashboard');
   };
 
   const schema = Yup.object().shape({
@@ -50,6 +53,9 @@ const Login = () => {
   return (
     <div className="login-page">
       <div className="container">
+        <div className="text-center mb-4">
+          <h2 style={{ color: 'red' }}>Welcome to Blood Bank</h2>
+        </div>
         <Form
           className="card p-3 mx-auto col-lg-5 col-md-12"
           onSubmit={formik.handleSubmit}

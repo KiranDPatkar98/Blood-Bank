@@ -29,8 +29,8 @@ class BloodGroup(models.Model):
         return self.group
 
 
-class BloodDonar(BaseModel):
-    donar = models.ForeignKey(
+class BloodDonor(BaseModel):
+    donor = models.ForeignKey(
         Usermaster, on_delete=models.CASCADE, to_field='username')  # we are mentioning here username as foreignkey by default it wil take primary key
     blood_group = models.ForeignKey(
         BloodGroup, on_delete=models.CASCADE, to_field='group')
@@ -39,7 +39,7 @@ class BloodDonar(BaseModel):
     address = models.TextField(max_length=200)
 
     def __str__(self):
-        return self.donar.username
+        return self.donor.username
 
 
 class BloodRequests(BaseModel):

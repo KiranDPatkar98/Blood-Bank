@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useAPIClient } from '../../api';
@@ -52,6 +52,10 @@ const RequestBlood = () => {
     } else setOpen(false);
   };
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="request-page">
       <div className="container">
@@ -62,7 +66,7 @@ const RequestBlood = () => {
           handleClose={onModalClose}
           handleSubmit={onModalClose}
         />
-        <Row>
+        <Row className="g-3">
           <Col lg={6} md={12}>
             <Form className="card p-3 " onSubmit={formik.handleSubmit}>
               <Form.Group className="mb-3" controlId="name">

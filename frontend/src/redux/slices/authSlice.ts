@@ -5,7 +5,8 @@ const appSlice = createSlice({
     name: 'app',
     initialState: {
         loginState: LoginStates.LOADING,
-        tokenExpired: false,
+        isSuperUser: false,
+        sessionExpired: false,
     },
     reducers: {
         updatedLoginState(state, action) {
@@ -14,17 +15,25 @@ const appSlice = createSlice({
                 loginState: action.payload
             };
         },
-        updatedTokenExpired(state, action){
+        updateIsSuperUser(state,action){
             return {
                 ...state,
-                tokenExpired: action.payload
+                isSuperUser: action.payload
+            };
+
+        },
+        updatedSessionExpired(state, action){
+            return {
+                ...state,
+                sessionExpired: action.payload
             }
-        }
+        },
+
     }
 });
 
 export const {
-    updatedLoginState
+    updatedLoginState, updateIsSuperUser, updatedSessionExpired
 } = appSlice.actions;
 
 export default appSlice.reducer;

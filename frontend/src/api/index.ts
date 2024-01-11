@@ -1,7 +1,12 @@
 import { useCallback } from "react"
 import axios, { AxiosError } from 'axios'
+import { useDispatch, useSelector } from "react-redux";
+import { LoginStates } from "../types/LoginState";
+import { updatedSessionExpired } from "../redux/slices/authSlice";
 
 const useAPIClient=()=>{
+    const { loginState } = useSelector((s: any) => s.app);
+    const dispatch=useDispatch()
 
 const makeRequest=useCallback(async(endpoint:string,options?: { method: string; body?: any; },overrideBaseUrl?: any)=>{
     const token=localStorage.getItem('access_token')
@@ -10,7 +15,7 @@ const makeRequest=useCallback(async(endpoint:string,options?: { method: string; 
         const headers = {
             Accept: 'application/json',
             'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {})
+            ...(token&&endpoint!=='/login/' ? { Authorization: `Bearer ${token}` } : {})
         };
         const response = await axios({
             url: baseURL,
@@ -21,7 +26,10 @@ const makeRequest=useCallback(async(endpoint:string,options?: { method: string; 
         return response.data
     }
     catch(error){
-        if (error instanceof AxiosError) {    
+        if (error instanceof AxiosError) {  
+            if(error?.response?.status ===401 && loginState===LoginStates.LOGGED_IN){
+              dispatch(updatedSessionExpired(true))
+            }  
             throw new Error(JSON.stringify({ ...error?.response?.data, status: error?.response?.status }));
         }
 

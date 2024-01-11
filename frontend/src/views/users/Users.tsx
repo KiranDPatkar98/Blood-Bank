@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Container, Row, Col, Button } from 'react-bootstrap';
+import { Table, Container, Row, Col, Button, Modal } from 'react-bootstrap';
 import { useAPIClient } from '../../api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPen, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -21,33 +21,50 @@ const Users = () => {
   const { makeRequest, remove } = useAPIClient();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [deleteInfo, setDeleteInfo] = useState<string>('');
 
   const getUsers = async () => {
     try {
       const res = await makeRequest('/get-users/');
       dispatch(receivedUsers(res.data));
       setUsers(res.data);
-    } catch (e) {
-      const error = JSON.parse((e as Error).message);
-      if (error.status === 401) {
-        console.log('tOKEN IS EXPIRD');
-      }
-    }
+    } catch (e) {}
   };
 
   const deleteUser = async (id: any) => {
     try {
       await remove(`/delete-user/?uid=${id}`);
+      getUsers();
+      setDeleteInfo('');
     } catch {}
   };
 
   useEffect(() => {
     getUsers();
+    window.scrollTo(0, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleClose = () => {
+    setDeleteInfo('');
+  };
+
   return (
     <Container>
+      <Modal show={!!deleteInfo} onHide={handleClose}>
+        <Modal.Header closeButton> Alert</Modal.Header>
+        <Modal.Body className="text-center">
+          Are you sure you want to delete ?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+          <Button variant="danger" onClick={() => deleteUser(deleteInfo)}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
       <Row>
         <Col>
           <div className="new-user mb-2">
@@ -83,7 +100,7 @@ const Users = () => {
                         <FontAwesomeIcon
                           className="action-icon mx-2"
                           icon={faTrash}
-                          onClick={() => deleteUser(value.uid)}
+                          onClick={() => setDeleteInfo(value.uid)}
                         />
                       </td>
                     </tr>

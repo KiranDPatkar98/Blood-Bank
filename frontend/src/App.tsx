@@ -3,6 +3,7 @@ import MainRouter from './routes/MainRouter';
 import LoginRouter from './routes/LoginRouter';
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { Spinner } from 'react-bootstrap';
 import { LoginStates } from './types/LoginState';
 import { useAPIClient } from './api';
 import { updatedLoginState } from './redux/slices/authSlice';
@@ -15,7 +16,11 @@ function App() {
   const checkAuth = async () => {
     try {
       const res = await makeRequest('/check-auth/');
-      dispatch(updatedLoginState(res.data.authenticated));
+      dispatch(
+        updatedLoginState(
+          res.authenticated ? LoginStates.LOGGED_IN : LoginStates.LOGGED_OUT
+        )
+      );
     } catch {
       dispatch(updatedLoginState(false));
     }
@@ -26,7 +31,16 @@ function App() {
   }, []);
 
   if (loginState === LoginStates.LOADING) {
-    return <h1>Loading</h1>;
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ height: '100vh' }}
+      >
+        <Spinner animation="border" role="status">
+          <span className="sr-only">Loading...</span>
+        </Spinner>
+      </div>
+    );
   }
 
   return (

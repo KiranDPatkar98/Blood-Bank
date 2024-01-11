@@ -1,7 +1,7 @@
 import { Container, Navbar } from 'react-bootstrap';
 const Footer = () => {
   return (
-    <Navbar bg="dark" data-bs-theme="dark" fixed="bottom">
+    <Navbar bg="dark" data-bs-theme="dark">
       <Container>
         <Navbar.Brand>
           &copy; {new Date().getFullYear()} Blood bank

@@ -22,15 +22,11 @@ const ManageUser = ({ action }: Props) => {
     email: Yup.string()
       .email('Invalid email address format')
       .required('Email is required'),
-    phoneNumber: Yup.string().required('Password is required'),
-    username: Yup.string()
-      .min(3, 'Username must be 3 characters at minimum')
-      .required('Username is required'),
+    phoneNumber: Yup.string().required('Phone number is required'),
+    username: Yup.string().required('Username is required'),
     password:
       action === 'add'
-        ? Yup.string()
-            .min(3, 'Password must be 3 characters at minimum')
-            .required('Password is required')
+        ? Yup.string().required('Password is required')
         : Yup.string().notRequired(),
   });
 
@@ -45,6 +41,7 @@ const ManageUser = ({ action }: Props) => {
       delete data['phoneNumber'];
       await post('/create-user/', data);
       setSuccessMessage('User created successfully');
+      formik.resetForm();
     } catch (e) {
       const error = JSON.parse((e as Error).message);
       setErrorMEssage(error.message);
@@ -99,15 +96,23 @@ const ManageUser = ({ action }: Props) => {
   }, [userInfo]);
 
   const handleClose = () => {
-    navigate('-1');
+    navigate('/users');
   };
 
   return (
     <div className="container">
       <div className="">
         <Modal show={!!successMessage} onHide={handleClose}>
-          <Modal.Header closeButton></Modal.Header>
+          <Modal.Header closeButton> Success</Modal.Header>
           <Modal.Body className="text-center">{successMessage}</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleClose}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={handleClose}>
+              Ok
+            </Button>
+          </Modal.Footer>
         </Modal>
         <div className="mb-3">
           <Button onClick={() => navigate(-1)}>Go back</Button>
@@ -181,21 +186,23 @@ const ManageUser = ({ action }: Props) => {
               {formik.touched.username && formik.errors.username}
             </Form.Control.Feedback>
           </Form.Group>
-          <Form.Group className="mb-3" controlId="password">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              id="password"
-              type="password"
-              placeholder="*****"
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              isInvalid={!formik.values.password && formik.touched.password}
-              value={formik.values.password}
-            />
-            <Form.Control.Feedback type="invalid">
-              {formik.touched.password && formik.errors.password}
-            </Form.Control.Feedback>
-          </Form.Group>
+          {action === 'add' && (
+            <Form.Group className="mb-3" controlId="password">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                id="password"
+                type="password"
+                placeholder="*****"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                isInvalid={!formik.values.password && formik.touched.password}
+                value={formik.values.password}
+              />
+              <Form.Control.Feedback type="invalid">
+                {formik.touched.password && formik.errors.password}
+              </Form.Control.Feedback>
+            </Form.Group>
+          )}
           {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
           <Button type="submit">{action === 'add' ? 'Add' : 'Update'}</Button>
         </Form>

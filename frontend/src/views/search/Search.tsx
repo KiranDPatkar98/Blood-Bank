@@ -3,7 +3,7 @@ import * as Yup from 'yup';
 import { useAPIClient } from '../../api';
 import { Button, Form, Table } from 'react-bootstrap';
 import { bloodGroups } from '../../helpers/bloodGroups';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const schema = Yup.object().shape({
   bloodGroup: Yup.string().required('Blood group is required'),
@@ -11,7 +11,7 @@ const schema = Yup.object().shape({
 });
 
 type searchUser = {
-  donar: string;
+  donor: string;
   city: string;
   blood_group: string;
   address: string;
@@ -21,23 +21,25 @@ type searchUser = {
 
 const Search = () => {
   const { makeRequest } = useAPIClient();
-  const [donars, setDonars] = useState<searchUser[] | null>(null);
+  const [donors, setDonors] = useState<searchUser[] | null>(null);
 
-  const searchDonar = async (values: any) => {
+  const searchDonor = async (values: any) => {
     try {
       const { city, bloodGroup } = values;
-      console.log(bloodGroup, 'bloodGroup');
-
       const res = await makeRequest(
         `/search-donor/?city=${city}&blood_group=${encodeURIComponent(
           bloodGroup
         )}`
       );
-      setDonars(res.data);
+      setDonors(res.data);
     } catch (e) {
       //   const error = JSON.parse((e as Error).message);
     }
   };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const formik = useFormik({
     initialValues: {
@@ -47,7 +49,7 @@ const Search = () => {
     enableReinitialize: true,
     validationSchema: schema,
     onSubmit: (values) => {
-      searchDonar(values);
+      searchDonor(values);
     },
   });
 
@@ -105,23 +107,23 @@ const Search = () => {
           </div>
         </div>
       </Form>
-      {donars && (
+      {donors && (
         <Table className="mt-4">
           <thead>
             <tr>
               <th>Sl. No</th>
-              <th>Donar name</th>
+              <th>Donor name</th>
               <th>Phone number</th>
               <th>Email</th>
               <th>Address</th>
             </tr>
           </thead>
           <tbody>
-            {donars.length > 0 ? (
-              donars.map((value, idx) => (
+            {donors.length > 0 ? (
+              donors.map((value, idx) => (
                 <tr>
                   <td>{idx + 1}</td>
-                  <td>{value.donar}</td>
+                  <td>{value.donor}</td>
                   <td>{value.phone_number}</td>
                   <td>{value.email}</td>
                   <td>{value.address}</td>
