@@ -330,28 +330,34 @@ def search_donor(request):
     blood_group = request.GET.get('blood_group')
     city = request.GET.get('city')
     donors = BloodDonor.objects.all()
-    try:
 
+    try:
         if blood_group:
             donors = donors.filter(blood_group__group=blood_group)
         if city:
-            donors = donors.filter(city=city)
+            donors = donors.filter(city__iexact=city)
 
         # fetching the donor related data from usermaster table
-        donors_with_user_info = donors.select_related('donar')
+        donors_with_user_info = donors.prefetch_related('donor')
 
-        serializer = SearchDonorSerializer(donors_with_user_info, many=True)
+        # Convert the queryset to a list
+        donors_list = list(donors_with_user_info)
+
+        # Serialize each donor individually
+        serializer = SearchDonorSerializer(donors_list, many=True)
+        serialized_data = serializer.data
 
         return Response({
             'status': status.HTTP_200_OK,
-            'message': 'Fetched succesfully',
-            'data': serializer.data
+            'message': 'Fetched successfully',
+            'data': serialized_data
         })
     except:
         return Response({
-            'status': status.HTTP_404_NOT_FOUND,
-            'message': 'Not found',
-        })
+            'status': status.HTTP_422_UNPROCESSABLE_ENTITY,
+            'message': 'Invalid data',
+            'errors': str(serializer.errors)
+        }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
 # Blood-inventory
